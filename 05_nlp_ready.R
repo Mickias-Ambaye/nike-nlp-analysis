@@ -1,6 +1,7 @@
 # ==============================================================================
 # NIKE TEXT ANALYTICS — FULL NLP ANALYSIS
 # Team Assignment: Text Analytics for Strategic Brand Intelligence
+# Brand Perception, Pricing, Competitive Positioning
 # Client: Nike | Competitors: Adidas, Under Armour
 # ==============================================================================
 # Data: master_clean.rds (17,348 documents from App Store, Reddit, Trustpilot)
@@ -19,8 +20,6 @@
 #install.packages("ggraph")
 #install.packages("widyr")
 #install.packages("scales")
-#install.packages("quanteda")
-#install.packages("quanteda.textmodels")
 
 library(tidyverse)
 library(tidytext)
@@ -77,6 +76,14 @@ custom_stops <- tibble(word = c("app", "http", "https",
 
 master_tokens <- master_tokens %>%
   anti_join(custom_stops)
+
+# drop numeric junk, alphanumeric codes, and single-char tokens
+# catches things like "232335", "1x", "3d", "00s", "2nd" etc.
+master_tokens <- master_tokens %>%
+  filter(!str_detect(word, "^[0-9]+$")) %>%        # pure numbers
+  filter(!str_detect(word, "^[0-9]+[a-z]{1,2}$")) %>%  # "1x", "3d", "2nd", "00s"
+  filter(!str_detect(word, "^[a-z]{1,2}[0-9]+$")) %>%  # "x1", "v2"
+  filter(nchar(word) >= 2)                          # single letters
 
 # check top words after cleaning
 master_tokens %>%
@@ -713,4 +720,5 @@ cor.test(data = frequency[frequency$author == "Adidas", ],
 # Nike vs Under Armour
 cor.test(data = frequency[frequency$author == "Under Armour", ],
          ~proportion + `Nike`)
+
 
